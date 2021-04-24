@@ -226,7 +226,8 @@ int main(int, char**)
  //        std::cout << s << std::endl;
  //        return 1;
  //    }
- //----------------- ending shaoe file reader initialization-------------------
+ //----------------- ending shaoe file reader initialization---------------I have commented it out because it has not worked as yet due to header file--------
+// ----------------.hpp conflict in my editor--------------------
 
     // Show the window
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
