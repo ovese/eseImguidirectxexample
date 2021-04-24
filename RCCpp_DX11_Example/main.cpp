@@ -7,6 +7,56 @@
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include <tchar.h>
+#include <iostream>
+#include <string>
+#include <string.h>
+#include <vector>
+using namespace std;
+
+
+
+//***************************adding this at top of source file main.cpp for image rendering in direct11***************************
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+//******************heADERS FOR SHAPE FILE MANIPULATION
+#include "shapefil.h"
+//#include <../noncopyable.hpp>
+//#include <../geometry.hpp>
+//#include <../geometries.hpp>
+//#include <../shape_creator.hpp>
+//#include <../shp_create_object.hpp>
+//#include <../shp_create_object_multi.hpp>
+//#include <../dbf_write_attribute.hpp>
+//#include <boost/geometry/io/wkt/wkt.hpp>
+
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/geometries.hpp>
+//#include <boost/geometry/geometries/points_xy.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shape_creator.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shp_create_object.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shp_create_object_multi.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/dbf_write_attribute.hpp>
+
+//#include <boost/core/noncopyable.hpp>
+//#include "boost\config.hpp"
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/geometries.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shape_creator.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shp_create_object.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/shp_create_object_multi.hpp>
+//#include <boost/geometry/extensions/gis/io/shapelib/dbf_write_attribute.hpp>
+//#include <boost/geometry/io/wkt/wkt.hpp>
+
+//***********************second example***********
+
+//#include <boost\geometry\geometry.hpp>
+//#include "boost/geometry/geometries/geometries.hpp"
+//#include "boost/geometry/geometries/point_xy.hpp"
+
+//using namespace boost::geometry;
+
+//***************** END OF HEADERS FOR SHAPE FILE MANIPULATION***************
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -20,6 +70,116 @@ void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+
+// Simple helper function to load an image into a DX11 texture with common settings
+bool LoadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
+{
+    // Load from disk into a raw RGBA buffer
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create texture
+    D3D11_TEXTURE2D_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Width = image_width;
+    desc.Height = image_height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+
+    ID3D11Texture2D *pTexture = NULL;
+    D3D11_SUBRESOURCE_DATA subResource;
+    subResource.pSysMem = image_data;
+    subResource.SysMemPitch = desc.Width * 4;
+    subResource.SysMemSlicePitch = 0;
+    g_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+
+    // Create texture view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    g_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
+    pTexture->Release();
+
+    *out_width = image_width;
+    *out_height = image_height;
+    stbi_image_free(image_data);
+
+    return true;
+}
+
+//***********************ending the addition for directx11 image rendering
+
+//++++++++++++++++Addition for Shape file reader+++++++++++++++++++++++++
+template <typename T, typename F>
+ void read_shapefile(const std::string& filename, std::vector<T>& polygons, F functor)
+ {
+     try
+     {
+         SHPHandle handle = SHPOpen(filename.c_str(), "rb");
+         if (handle <= 0)
+         {
+             throw std::string("File " + filename + " not found");
+         }
+ 
+         int nShapeType, nEntities;
+         double adfMinBound[4], adfMaxBound[4];
+         SHPGetInfo(handle, &nEntities, &nShapeType, adfMinBound, adfMaxBound );
+ 
+         for (int i = 0; i < nEntities; i++)
+         {
+             SHPObject* psShape = SHPReadObject(handle, i );
+ 
+             // Read only polygons, and only those without holes
+             if (psShape->nSHPType == SHPT_POLYGON && psShape->nParts == 1)
+             {
+                 T polygon;
+                 functor(psShape, polygon);
+                 polygons.push_back(polygon);
+             }
+             SHPDestroyObject( psShape );
+         }
+         SHPClose(handle);
+     }
+     catch(const std::string& s)
+     {
+         throw s;
+     }
+     catch(...)
+     {
+         throw std::string("Other exception");
+     }
+ }
+ 
+ 
+ template <typename T>
+ void convert(SHPObject* psShape, T& polygon)
+ {
+     double* x = psShape->padfX;
+     double* y = psShape->padfY;
+     for (int v = 0; v < psShape->nVertices; v++)
+     {
+         typename point_type<T>::type point;
+         assign_values(point, x[v], y[v]);
+         append(polygon, point);
+     }
+ }
+ //-------------------------ending addition for shapefile reader----------------------------
+
+//***************************adding this at top of source file main.cpp for shape file rendering ***************************
+
+
 
 // Main code
 int main(int, char**)
@@ -38,6 +198,36 @@ int main(int, char**)
         return 1;
     }
 
+	//************Initializing and loading texture*********************
+	int my_image_width = 0;
+	int my_image_height = 0;
+	ID3D11ShaderResourceView* my_texture = NULL;
+	bool ret = LoadTextureFromFile("../eseweb.jpg", &my_texture, &my_image_width, &my_image_height);
+	IM_ASSERT(ret);
+	ID3D11ShaderResourceView* my_texture_one = NULL;
+	bool ret1 = LoadTextureFromFile("../MyImage01.jpg", &my_texture_one, &my_image_width, &my_image_height);
+	IM_ASSERT(ret1);
+
+	//************Ending Initialization and loading of texture*********************
+
+	//+++++++++++++++++Initializing the shape file reader
+	//std::string filename = "c:/data/spatial/shape/world_free/world.shp";
+	//std::string filename = "../strassen.shp";
+ //
+ //    typedef model::polygon<model::d2::point_xy<double> > polygon_2d;
+ //    std::vector<polygon_2d> polygons;
+ //
+ //    try
+ //    {
+ //        read_shapefile(filename, polygons, convert<polygon_2d>);
+ //    }
+ //    catch(const std::string& s)
+ //    {
+ //        std::cout << s << std::endl;
+ //        return 1;
+ //    }
+ //----------------- ending shaoe file reader initialization-------------------
+
     // Show the window
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
@@ -50,8 +240,8 @@ int main(int, char**)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    //ImGui::StyleColorsDark();
+    ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -75,6 +265,10 @@ int main(int, char**)
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
+	bool show_shape_selector_window=false;
+	bool show_image_view_window=false;
+	bool chbx1_sel=false;
+	bool chbx2_sel=false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -116,6 +310,8 @@ int main(int, char**)
             ImGui::Text("Enfin Monsieur Raphael...Ese est la.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
             ImGui::Checkbox("Another Window", &show_another_window);
+			ImGui::Checkbox("Image View Window", &show_image_view_window);// I added the next two lines and windows
+			ImGui::Checkbox("Shape selector Window", &show_shape_selector_window); 
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
@@ -133,11 +329,94 @@ int main(int, char**)
         if (show_another_window)
         {
             ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
+            ImGui::Text("Devoir...Hello from another window!");
+
             if (ImGui::Button("Close Me"))
                 show_another_window = false;
+
+			//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
+
+		// ese is adding his own window here
+
+		// 4. Show another simple window.
+        if (show_image_view_window)
+        {
+            ImGui::Begin("Ese's Image View Window", &show_image_view_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			//I am adding code here
+			//ImGui::Begin("DirectX11 Texture Test");//this was the copied begin function, I used mine above
+			
+			ImGui::Checkbox("Select Image 1: ",&chbx1_sel);
+			ImGui::Checkbox("Select Image 2: ",&chbx2_sel);
+			ImGui::Text("pointer = %p", my_texture);
+			ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+			ImGui::Image((void*)my_texture, ImVec2(my_image_width, my_image_height));
+
+			if(!(chbx2_sel)){
+				ImGui::Text("pointer = %p", my_texture_one);
+				ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+				ImGui::Image((void*)my_texture_one, ImVec2(my_image_width, my_image_height));
+
+			}
+			//ImGui::InputText(
+			/*int state_n=0;
+			switch (state_n){
+				case 1:
+					chbx1_sel=true;
+					chbx2_sel=false;
+					ImGui::Text("pointer = %p", my_texture);
+					ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+					ImGui::Image((void*)my_texture, ImVec2(my_image_width, my_image_height));
+					break;
+				case 2:
+					chbx1_sel=false;
+					chbx2_sel=true;
+					ImGui::Text("pointer = %p", my_texture_one);
+					ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+					ImGui::Image((void*)my_texture_one, ImVec2(my_image_width, my_image_height));
+					break;
+				default:
+					chbx1_sel=false;
+					chbx2_sel=false;
+			}*/
+			
+			
+
+            if (ImGui::Button("Close Me"))
+                show_image_view_window = false;
+
+			//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
+		// ese is adding his own window here
+
+		// 5. Show another simple window.
+        if (show_shape_selector_window)
+        {
+            ImGui::Begin("Ese's Shape selector Window", &show_shape_selector_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			//I am adding code here
+			bool selected=false;
+			ImGui::Text("*******Shape selector*******");			
+			ImGui::Checkbox("Shape one", &selected);
+			ImGui::Checkbox("Shape two", &selected);
+			ImGui::Checkbox("Shape three", &selected);
+
+			//ImGui:
+
+			//// The example DirectX11 back-end uses ID3D11ShaderResourceView* to identify textures.
+			//ID3D11ShaderResourceView* my_texture_view;
+			//device->CreateShaderResourceView(my_texture, &my_shader_resource_view_desc, &my_texture_view);
+			//ImGui::Image((void*)my_texture_view, ImVec2(512,512));
+
+            if (ImGui::Button("Close Me"))
+                show_shape_selector_window = false;
+
+			//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+		
 
         // Rendering
         ImGui::Render();
