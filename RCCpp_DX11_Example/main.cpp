@@ -201,12 +201,23 @@ int main(int, char**)
 	//************Initializing and loading texture*********************
 	int my_image_width = 0;
 	int my_image_height = 0;
+	int width = 0;
+	int height = 0;
 	ID3D11ShaderResourceView* my_texture = NULL;
 	bool ret = LoadTextureFromFile("../eseweb.jpg", &my_texture, &my_image_width, &my_image_height);
 	IM_ASSERT(ret);
+
 	ID3D11ShaderResourceView* my_texture_one = NULL;
 	bool ret1 = LoadTextureFromFile("../MyImage01.jpg", &my_texture_one, &my_image_width, &my_image_height);
 	IM_ASSERT(ret1);
+
+	ID3D11ShaderResourceView* my_texture_view=NULL;
+	bool ret2 = LoadTextureFromFile("../gdalicon.png", &my_texture_view, &width, &height);
+	IM_ASSERT(ret2);
+
+	//ID3D11ShaderResourceView* my_texture_two = NULL;
+	//bool ret2 = LoadTextureFromFile("../strassen.shp", &my_texture_two, &my_image_width, &my_image_height);
+	////IM_ASSERT(ret2);
 
 	//************Ending Initialization and loading of texture*********************
 
@@ -270,6 +281,8 @@ int main(int, char**)
 	bool show_image_view_window=false;
 	bool chbx1_sel=false;
 	bool chbx2_sel=false;
+	bool chbx3_sel=false;
+	bool shp_sel=false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -350,15 +363,22 @@ int main(int, char**)
 			
 			ImGui::Checkbox("Select Image 1: ",&chbx1_sel);
 			ImGui::Checkbox("Select Image 2: ",&chbx2_sel);
+			ImGui::Checkbox("Select Image 3: ",&chbx3_sel);
+
 			ImGui::Text("pointer = %p", my_texture);
 			ImGui::Text("size = %d x %d", my_image_width, my_image_height);
 			ImGui::Image((void*)my_texture, ImVec2(my_image_width, my_image_height));
 
-			if(!(chbx2_sel)){
+			if(chbx2_sel){
 				ImGui::Text("pointer = %p", my_texture_one);
 				ImGui::Text("size = %d x %d", my_image_width, my_image_height);
 				ImGui::Image((void*)my_texture_one, ImVec2(my_image_width, my_image_height));
+			}
 
+			if(chbx3_sel){
+				ImGui::Text("pointer = %p", my_texture_view);
+				ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+				ImGui::Image((void*)my_texture_view, ImVec2(my_image_width, my_image_height));
 			}
 			//ImGui::InputText(
 			/*int state_n=0;
@@ -398,18 +418,56 @@ int main(int, char**)
         {
             ImGui::Begin("Ese's Shape selector Window", &show_shape_selector_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 			//I am adding code here
-			bool selected=false;
+			
 			ImGui::Text("*******Shape selector*******");			
-			ImGui::Checkbox("Shape one", &selected);
-			ImGui::Checkbox("Shape two", &selected);
-			ImGui::Checkbox("Shape three", &selected);
+			ImGui::Checkbox("Shape one", &shp_sel);
 
-			//ImGui:
+			//++++++++++++++++++++++++++++++++++++++++++
+			ImGui::Text("pointer = %p", my_texture_view);
+			ImGui::Text("size = %d x %d", width, height);
+			ImGui::Image((void*)my_texture_view, ImVec2(my_image_width, my_image_height));
 
-			//// The example DirectX11 back-end uses ID3D11ShaderResourceView* to identify textures.
-			//ID3D11ShaderResourceView* my_texture_view;
-			//device->CreateShaderResourceView(my_texture, &my_shader_resource_view_desc, &my_texture_view);
+			// The example DirectX11 back-end uses ID3D11ShaderResourceView* to identify textures.				
+			//static ID3D11Device* g_pd3dDevice =NULL;
+			
+			
+			//ID3D11Texture2D* my_texture= NULL;
+
+			//ImGuiIO& io = ImGui::GetIO();
+			//unsigned char* pixels;
+			////int width, height;
+			//io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+			//D3D11_TEXTURE2D_DESC desc;
+			//ZeroMemory(&desc, sizeof(desc));
+			//desc.Width = width;
+			//desc.Height = height;
+			//desc.MipLevels = 1;
+			//desc.ArraySize = 1;
+			//desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//desc.SampleDesc.Count = 1;
+			//desc.Usage = D3D11_USAGE_DEFAULT;
+			//desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			//desc.CPUAccessFlags = 0;
+
+			//D3D11_SUBRESOURCE_DATA subResource;
+			//subResource.pSysMem = pixels;
+			//subResource.SysMemPitch = desc.Width * 4;
+			//subResource.SysMemSlicePitch = 0;
+			//g_pd3dDevice->CreateTexture2D(&desc, &subResource, &my_texture);
+
+
+			//D3D11_SHADER_RESOURCE_VIEW_DESC my_shader_resource_view_desc;
+			//ZeroMemory(&my_shader_resource_view_desc, sizeof(my_shader_resource_view_desc));
+			//my_shader_resource_view_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			//my_shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			//my_shader_resource_view_desc.Texture2D.MipLevels = desc.MipLevels;
+			//my_shader_resource_view_desc.Texture2D.MostDetailedMip = 0;
+			//g_pd3dDevice->CreateShaderResourceView(my_texture, &my_shader_resource_view_desc, &my_texture_view);
 			//ImGui::Image((void*)my_texture_view, ImVec2(512,512));
+			//my_texture->Release();
+			//-----------------------------------------
+
 
             if (ImGui::Button("Close Me"))
                 show_shape_selector_window = false;

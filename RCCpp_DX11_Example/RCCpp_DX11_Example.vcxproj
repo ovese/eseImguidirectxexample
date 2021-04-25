@@ -86,12 +86,14 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\extensions\gis\io\shapelib;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;boost\geometry;boost;imgui;imgui\examples;RuntimeCompiledCPlusPlus\Aurora\RuntimeObjectSystem;RuntimeCompiledCPlusPlus\Aurora\RuntimeCompiler;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\RCCpp_DX11_Example\shapelib;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost1_76_0\boost;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost_1_66_0\boost;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\extensions\gis\io\shapelib;boost\geometry;boost;imgui;imgui\examples;RuntimeCompiledCPlusPlus\Aurora\RuntimeObjectSystem;RuntimeCompiledCPlusPlus\Aurora\RuntimeCompiler;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxgi.lib;RuntimeCompiler.lib;RuntimeObjectSystem.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(DXSDK_DIR)/Lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost1_76_0\libs;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost_1_66_0\libs;$(OutDir);$(DXSDK_DIR)/Lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -100,6 +102,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;imgui;imgui\examples;RuntimeCompiledCPlusPlus\Aurora\RuntimeObjectSystem;RuntimeCompiledCPlusPlus\Aurora\RuntimeCompiler;%(AdditionalIncludeDirectories);imgui\backends;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -116,6 +119,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;imgui;imgui\examples;RuntimeCompiledCPlusPlus\Aurora\RuntimeObjectSystem;RuntimeCompiledCPlusPlus\Aurora\RuntimeCompiler;%(AdditionalIncludeDirectories);imgui\backends;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -134,6 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\WorkEngine\RCCpp_DX11_Example\boost\geometry\geometries;imgui;imgui\examples;RuntimeCompiledCPlusPlus\Aurora\RuntimeObjectSystem;RuntimeCompiledCPlusPlus\Aurora\RuntimeCompiler;%(AdditionalIncludeDirectories);imgui\backends;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -145,6 +150,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\boost\geometry\geometries\geometries.hpp" />
+    <ClInclude Include="..\boost\geometry\geometries\point_xy.hpp" />
+    <ClInclude Include="..\boost\geometry\geometry.hpp" />
+    <ClInclude Include="..\shapefil.h" />
+    <ClInclude Include="boost\geometry\geometries\geometries.hpp" />
+    <ClInclude Include="boost\geometry\geometries\point_xy.hpp" />
+    <ClInclude Include="boost\geometry\geometry.hpp" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
@@ -163,7 +175,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui\misc\debuggers\imgui.natvis" />
-    <None Include="imgui\examples\README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

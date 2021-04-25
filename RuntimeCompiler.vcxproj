@@ -90,7 +90,7 @@
       <Optimization>Disabled</Optimization>
       <ExceptionHandling>Async</ExceptionHandling>
       <MinimalRebuild>false</MinimalRebuild>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost1_76_0\boost;C:\Users\Knowdyn\Desktop\Copied\Ese\Tekkaboki\ikore_cirad\EseBoost\boost_1_66_0\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
